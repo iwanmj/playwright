@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playwright Test Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .tabs-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .tab-input {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .tab-input:last-child {
+            margin-bottom: 0;
+        }
+
+        .tab-header {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 5px 20px rgba(108, 117, 125, 0.4);
+        }
+
+        .output-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .output-section.show {
+            display: block;
+        }
+
+        .code-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            font-size: 12px;
+            background: #4CAF50;
+        }
+
+        .copy-btn:hover {
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.4);
+        }
+
+        .success-message {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+
+        .info-box p {
+            color: #1976d2;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Playwright Test Generator</h1>
+        <p class="subtitle">Generate multi-tab test scripts easily</p>
+
+        <div class="info-box">
+            <p><strong>How to use:</strong> Enter the number of tabs you want to open and the URLs for each tab. The script will be generated automatically.</p>
+        </div>
+
+        <form id="testForm">
+            <div class="form-group">
+                <label for="numTabs">Number of Tabs:</label>
+                <input type="number" id="numTabs" min="1" max="10" value="3" required>
+            </div>
+
+            <button type="button" onclick="generateTabInputs()">Generate Tab Fields</button>
+
+            <div id="tabsContainer" class="tabs-container" style="margin-top: 25px;">
+                <!-- Tab inputs will be generated here -->
+            </div>
+
+            <button type="submit">🚀 Generate Test Script</button>
+            <button type="button" class="btn-secondary" onclick="resetForm()">🔄 Reset</button>
+        </form>
+
+        <div class="output-section" id="outputSection">
+            <h2 style="margin-bottom: 15px; color: #333;">Generated Test Script</h2>
+            <div style="position: relative;">
+                <button class="copy-btn" onclick="copyToClipboard()">📋 Copy</button>
+                <div class="code-output" id="codeOutput">
+                    <pre id="generatedCode"></pre>
+                </div>
+            </div>
+            <div class="success-message" id="successMessage">
+                ✓ Copied to clipboard! Save this as tests/example.spec.js
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate tab inputs when page loads
+        window.onload = function() {
+            generateTabInputs();
+        };
+
+        function generateTabInputs() {
+            const numTabs = parseInt(document.getElementById('numTabs').value);
+            const container = document.getElementById('tabsContainer');
+
+            container.innerHTML = '';
+
+            for (let i = 1; i <= numTabs; i++) {
+                const tabDiv = document.createElement('div');
+                tabDiv.className = 'tab-input';
+                tabDiv.innerHTML = `
+                    <div class="tab-header">Tab ${i}</div>
+                    <label>URL:</label>
+                    <input type="text"
+                           name="url_${i}"
+                           placeholder="https://example.com"
+                           value="${i === 1 ? 'https://rdo89.com/8Ts005d6' : ''}"
+                           required>
+                `;
+                container.appendChild(tabDiv);
+            }
+        }
+
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            generateTestScript();
+        });
+
+        function generateTestScript() {
+            const numTabs = parseInt(document.getElementById('numTabs').value);
+            const urls = [];
+
+            for (let i = 1; i <= numTabs; i++) {
+                const url = document.querySelector(`input[name="url_${i}"]`).value;
+                urls.push(url);
+            }
+
+            let script = `// @ts-check
+import { test, expect } from '@playwright/test';
+
+test('multiple tabs test - ${numTabs} tabs', async ({ context }) => {
+`;
+
+            for (let i = 0; i < urls.length; i++) {
+                const tabNum = i + 1;
+                script += `  // Tab ${tabNum}
+  const page${tabNum} = await context.newPage();
+  await page${tabNum}.goto('${urls[i]}');
+  await page${tabNum}.waitForLoadState('networkidle');
+  console.log('Tab ${tabNum} loaded: ${urls[i]}');
+
+`;
+            }
+
+            script += `  // Add your interactions here for each tab
+  // Example: await page1.click('button');
+
+  // Keep all tabs open until test completes
+  console.log('All ${numTabs} tabs are open and ready!');
+});
+`;
+
+            document.getElementById('generatedCode').textContent = script;
+            document.getElementById('outputSection').classList.add('show');
+            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyToClipboard() {
+            const code = document.getElementById('generatedCode').textContent;
+            navigator.clipboard.writeText(code).then(function() {
+                const successMsg = document.getElementById('successMessage');
+                successMsg.classList.add('show');
+                setTimeout(() => {
+                    successMsg.classList.remove('show');
+                }, 3000);
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('testForm').reset();
+            document.getElementById('numTabs').value = 3;
+            generateTabInputs();
+            document.getElementById('outputSection').classList.remove('show');
+        }
+
+        // Auto-generate tab inputs when number changes
+        document.getElementById('numTabs').addEventListener('change', generateTabInputs);
+    </script>
+</body>
+</html>
